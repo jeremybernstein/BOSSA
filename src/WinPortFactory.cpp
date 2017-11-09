@@ -102,16 +102,19 @@ WinPortFactory::begin()
     if (size < 1)
         return error();
 
-    GUID guids[size];
+    GUID* guids = new GUID[size];
 
     if (!SetupDiClassGuidsFromNameA("Ports", guids, size * sizeof(GUID), &size))
     {
+        delete[] guids;
         return error();
     }
 
     _devInfo = SetupDiGetClassDevs(guids, NULL, NULL, DIGCF_PRESENT);
-    if(_devInfo == INVALID_HANDLE_VALUE)
+    delete[] guids;
+    if (_devInfo == INVALID_HANDLE_VALUE) {
         return error();
+    }
 
     _cfgMgr = LoadLibrary("cfgmgr32");
     if (!_cfgMgr)

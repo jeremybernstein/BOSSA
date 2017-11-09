@@ -119,7 +119,7 @@ Flasher::write(const char* filename, uint32_t foffset)
         {
             uint32_t offset = 0;
             uint32_t bufferSize = _samba.writeBufferSize();
-            uint8_t buffer[bufferSize];
+            uint8_t *buffer = new uint8_t[bufferSize];
             
             while ((fbytes = fread(buffer, 1, bufferSize, infile)) > 0)
             {
@@ -135,11 +135,11 @@ Flasher::write(const char* filename, uint32_t foffset)
                 _flash->writeBuffer(foffset + offset, fbytes);
                 offset += fbytes;                
             }
-
+            delete[] buffer;
         }
         else
         {
-            uint8_t buffer[pageSize];
+            uint8_t *buffer = new uint8_t[pageSize];
             uint32_t pageOffset = foffset / pageSize;
 
             while ((fbytes = fread(buffer, 1, pageSize, infile)) > 0)
@@ -153,7 +153,7 @@ Flasher::write(const char* filename, uint32_t foffset)
                 if (pageNum == numPages || fbytes != pageSize)
                     break;
             }
-
+            delete[] buffer;
         }
     }
     catch(...)
@@ -171,8 +171,8 @@ Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalError
 {
     FILE* infile;
     uint32_t pageSize = _flash->pageSize();
-    uint8_t bufferA[pageSize];
-    uint8_t bufferB[pageSize];
+    uint8_t *bufferA;
+    uint8_t *bufferB;
     uint32_t pageNum = 0;
     uint32_t numPages;
     uint32_t pageOffset;
@@ -207,6 +207,8 @@ Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalError
 
         _observer.onStatus("Verify %ld bytes of flash\n", fsize);
 
+        bufferA = new uint8_t[pageSize];
+        bufferB = new uint8_t[pageSize];
         while ((fbytes = fread(bufferA, 1, pageSize, infile)) > 0)
         {
             byteErrors = 0;
@@ -252,6 +254,8 @@ Flasher::verify(const char* filename, uint32_t& pageErrors, uint32_t& totalError
             if (pageNum == numPages || fbytes != pageSize)
                 break;
         }
+        delete[] bufferA;
+        delete[] bufferB;
     }
     catch(...)
     {
@@ -274,7 +278,7 @@ Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset)
 {
     FILE* outfile;
     uint32_t pageSize = _flash->pageSize();
-    uint8_t buffer[pageSize];
+    uint8_t *buffer;
     uint32_t pageNum = 0;
     uint32_t pageOffset;
     uint32_t numPages;
@@ -300,6 +304,7 @@ Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset)
     
     try
     {
+        buffer = new uint8_t[pageSize];
         for (pageNum = 0; pageNum < numPages; pageNum++)
         {
             _observer.onProgress(pageNum, numPages);
@@ -312,6 +317,7 @@ Flasher::read(const char* filename, uint32_t fsize, uint32_t foffset)
             if (fbytes != pageSize)
                 throw FileShortError();
         }
+        delete[] buffer;
     }
     catch(...)
     {

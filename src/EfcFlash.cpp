@@ -29,7 +29,11 @@
 #include "EfcFlash.h"
 
 #include <assert.h>
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <stdio.h>
 
 #define EFC_KEY         0x5a

@@ -29,7 +29,11 @@
 #include "EefcFlash.h"
 
 #include <assert.h>
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <stdio.h>
 
 #define EEFC_KEY        0x5a

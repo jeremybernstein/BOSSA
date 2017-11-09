@@ -32,7 +32,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <ctype.h>
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 using namespace std;
 
@@ -631,7 +635,7 @@ Samba::checksumBuffer(uint32_t start_addr, uint32_t size)
     cmd[9] = 0;
     uint32_t res;// = cmd[1] << 8 | cmd[2];
     if (sscanf((const char *)(cmd+1), "%x", &res) != 1)
-	throw SambaError();
+    throw SambaError();
     if (_debug)
         printf("%x\n", res);
     return res;
